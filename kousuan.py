@@ -1,4 +1,5 @@
 from random import randint
+from pathlib import Path
 import time
 
 operators = ['+', '-', '*', '/']
@@ -60,22 +61,29 @@ def generateEquations(count):
         # print(equation)
     return equations
 
-def DoTheMath(equations):
+def DoTheMath(equations, logFile):
     unsolvedEquations = []
     while len(equations) > 0:
-        count = len(equations) - 1
+        count = 1
         checkpointTime = time.perf_counter()
         for equation in equations:
-            print(f'{len(equations) - count}.')
-            count = count - 1
+            print(f'{count}.')
             answer = getAnIntInput(f'\t{equation[0]}')
             if answer != equation[1]:
                 unsolvedEquations.append(equation)
+                logFile.write(f'{equation[0]}{answer}\tNO\n')
+            else:
+                logFile.write(f'{equation[0]}{answer}\tYES\n')
+            count = count + 1
+
         timeSpend = int(time.perf_counter() - checkpointTime)
-        print(f'用时 {int(timeSpend/60)} 分 {timeSpend%60} 秒, 正确率: {len(equations) - len(unsolvedEquations)} / {len(equations)}\n')
+        logMsg = f'\n用时 {int(timeSpend/60)} 分 {timeSpend%60} 秒, 正确率: {len(equations) - len(unsolvedEquations)} / {len(equations)}\n'
+        print(logMsg)
         
         if len(unsolvedEquations) > 0:
-            print(f'现在开始订正做错的 {len(unsolvedEquations)} 题, 加油!\n')
+            logMsg = f'现在开始订正做错的 {len(unsolvedEquations)} 题, 加油!\n'
+            print(logMsg)
+            logFile.write(logMsg)
         
         equations = unsolvedEquations
         unsolvedEquations = []
@@ -103,17 +111,24 @@ while True:
         time.sleep(1)
     print("开始!")
 
+    Path('口算成绩').mkdir(exist_ok=True)
+    logFile = open('口算成绩/' + time.strftime("%Y-%m-%d") + '.log', 'a')
+    logFile.write(f'\n{"*"*50}\n\n挑战 {total} 题, 难度 {difficulty}\n')
+
     print('-'*50)
     time.sleep(1)
     equations = generateEquations(total)
     startTime = time.perf_counter()
-    DoTheMath(equations)
+    DoTheMath(equations, logFile)
     print('-'*50)
 
     timeSpend = int(time.perf_counter() - startTime)
-    print(f'太棒了! 挑战 {total} 题成功! 共用时 {int(timeSpend/60)} 分 {timeSpend%60} 秒\n')
+    logMsg = f'\n太棒了! 挑战 {total} 题成功! 共用时 {int(timeSpend/60)} 分 {timeSpend%60} 秒\n'
+    print(logMsg)
+    logFile.write(logMsg)
     time.sleep(2)
 
-    retry = getAnIntInput(f'再次挑战请输入1, 按其他数字退出:')
+    retry = getAnIntInput(f'\n再次挑战请输入1, 按其他数字退出:')
     if retry != 1:
+        logFile.close()
         break
