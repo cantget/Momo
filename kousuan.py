@@ -95,14 +95,16 @@ def getAnIntInput(msg):
         except:
             pass
 
+totalTimeSpend = 0
+totalQuestions = 0
 while True:
-    total = getAnIntInput("你要挑战多少题:")
+    questionCount = getAnIntInput("你要挑战多少题:")
 
     difficulty = 0
     while difficulty < 1 or difficulty > 5:
         difficulty = getAnIntInput("请选择难度 (1-5): ")
     
-    print(f'准备挑战 {total} 题')
+    print(f'准备挑战 {questionCount} 题')
     time.sleep(1)
     countDown = 3
     while countDown > 0:
@@ -113,22 +115,25 @@ while True:
 
     Path('口算成绩').mkdir(exist_ok=True)
     logFile = open('口算成绩/' + time.strftime("%Y-%m-%d") + '.log', 'a')
-    logFile.write(f'\n{"*"*50}\n\n挑战 {total} 题, 难度 {difficulty}\n')
+    logFile.write(f'\n{"*"*50}\n\n挑战 {questionCount} 题, 难度 {difficulty}\n')
 
     print('-'*50)
     time.sleep(1)
-    equations = generateEquations(total)
+    equations = generateEquations(questionCount)
     startTime = time.perf_counter()
     DoTheMath(equations, logFile)
     print('-'*50)
 
     timeSpend = int(time.perf_counter() - startTime)
-    logMsg = f'\n太棒了! 挑战 {total} 题成功! 共用时 {int(timeSpend/60)} 分 {timeSpend%60} 秒\n'
+    totalTimeSpend += timeSpend
+    totalQuestions += questionCount
+    logMsg = f'\n太棒了! 挑战 {questionCount} 题成功! 共用时 {int(timeSpend/60)} 分 {timeSpend%60} 秒\n'
     print(logMsg)
     logFile.write(logMsg)
     time.sleep(2)
 
     retry = getAnIntInput(f'\n再次挑战请输入1, 按其他数字退出:')
     if retry != 1:
+        logFile.write(f'\n{"#"*80}\n今天共答 {totalQuestions} 题, 用时 {int(totalTimeSpend/60)} 分 {totalTimeSpend%60} 秒')
         logFile.close()
         break
