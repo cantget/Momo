@@ -56,7 +56,7 @@ def DoTest(Tests):
         unfinishedTests = []
         
 count = 0
-step = 2
+step = 5
 while True:
     print(f'\n{"-"*50}\n随机测试 {step} 个成语\n')
     DoTest(ChengyuTestList[count:count+step])
